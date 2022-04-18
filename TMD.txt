@@ -1,0 +1,6 @@
+awk '{ if ($1=="TMD") print $2, $6}' lac-TMD01.out > TMD.out
+
+##Creating a loop in alll the files.
+for i in *.out; do
+        awk '{ if ($1=="TMD") print $2, $6, $7}' $i  > $i.dat
+done

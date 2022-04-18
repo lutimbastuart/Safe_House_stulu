@@ -1,0 +1,56 @@
+#This analysis shows equibilisation of the system as we observe the cell dimensions remaining constant and the end and droping in the first run. 
+
+mkdir analysis
+cd analysis/
+mkdir celldims
+cd celldims/
+vi get_cell2.awk
+
+chmod 777 get_cell2.awk
+
+###............Analysis............##
+awk -f get_cell2.awk ../../npt02.xst > npt02_cell.out
+ xmgrace -nxy npt02_cell.out 
+
+awk -f get_cell2.awk ../../npt01.xst > npt01_cell.out
+
+vi ../../nvt02.xst
+
+vi ../../npt01.xst
+
+##.......................#Printing out the cell dimension. the cell volume
+awk '{print $1}' npt02_cell.out 
+
+awk '{print $1+0.014}' npt02_cell.out
+
+awk '{print $1+0.014, $2}' npt02_cell.out
+
+awk '{print $1+0.014, $2, $3}' npt02_cell.out
+
+awk '{print $1+0.014, $2, $3}' npt02_cell.out > npt02_cell-cont.out
+
+Then combining the cells in one file. 
+cat npt01_cell.out npt02_cell-cont.out > npt01-02_cell.out
+vi npt01-02_cell.out
+xmgrace -nxy npt01-02_cell.out
+
+Note:)- For the simulation sysytems that didnot crash through the equilbration, the get_cell2.awk script has to be edited in such a way that it begins it considers a continuation in the cell dimension by multipliying the x dimension by its number. as shown below.
+
+ #The 14400 was obtained by multipling 120x120 :)
+
+####################The get_cell2-awk-########################
+#For the extraction of the cell dimensions###
+
+BEGIN{i=.001;first=1} $1 !~/^#|^0/ {     
+if(first){ao=14400;first=0}
+print i,($2*$6)/ao,$10;i+=.001}
+~                                   
+#######################-----------#############################
+
+
+
+
+
+
+
+

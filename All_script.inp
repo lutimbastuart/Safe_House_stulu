@@ -1,0 +1,169 @@
+#step_one
+mol new step5_assembly.pdb
+set sel [atomselect top lipids]
+$sel num
+$sel writepdb lipids.pdb
+$sel writepsf lipids.psf
+
+mol new 4zyr_A.pdb
+package require psfgen
+/nethome/lutimba/Toppology_files/topology top_all27_prot_lipid.inp
+/nethome/lutimba/Toppology_files/topology top_all27_prot_lipid.rtf
+pdbalias residue HIS HSE
+pdbalias atom ILE CD1 CD
+segment U {pdb 4zyr_A.pdb}
+patch GLUP U:325
+coordpdb 4zyr_A.pdb U
+guesscoord
+writepdb protein.pdb
+writepsf protein.psf
+mol delete all
+#-----------------------------------------------
+mol new lipids.pdb
+set pope [atomselect top all]
+set step5 [mol new lipids.psf]
+mol addfile lipids.pdb
+set membsel [atomselect $step5 all]
+
+#aligning the membrane to its center
+$pope moveby [vecinvert [measure center $pope weight mass]]
+$pope writepdb POPE_ort.pdb
+$pope writepsf POPE_ort.psf
+
+#alignment of the protein vesitibular
+mol new protein.pdb
+set vest [atomselect top protein]
+$vest moveby [vecinvert [measure center $vest weight mass]]
+display resetview
+$vest move [transaxis z -25]
+
+package require Orient
+  namespace import Orient::orient
+
+  set sel [atomselect top "all"]
+  set I [draw principalaxes $sel]
+  set A [orient $sel [lindex $I 2] {0 0 1}]
+  $sel move $A
+  set I [draw principalaxes $sel]
+  set A [orient $sel [lindex $I 1] {0 1 0}]
+  $sel move $A
+  set I [draw principalaxes $sel]
+$sel writepdb protein_ort.pdb
+$sel writepdb protein_ort.psf
+#-----------------------------------------------------------------------
+
+mol delete all
+package require psfgen
+resetpsf
+readpsf POPE_ort.psf
+coordpdb POPE_ort.pdb
+readpsf protein_ort.psf
+coordpdb protein_ort.pdb
+writepsf Lac_P.psf
+writepdb Lac_p.pdb
+#--------------------------------------------------------------------------
+solvate -t 6 -w solvate
+#-----------------------------------------------------------
+mol new solvate.psf
+mol new solvate.pdb
+set POPE "resname POPE"
+set all [atomselect top all]
+all set beta 0
+
+set seltext1 "$POPE and same residue as within 0.6 of protein"
+set sel1 [atomselect top $seltext1]
+$sel1 set beta 1
+set badlipid [atomselect top "name P and beta > 0"]
+set seglistlipid [$badlipid get segid]
+set reslistlipid [$badlipid get resid]
+
+set seltext2 "water and same residue as within 3 of protein"
+set sel [atomselect top $seltext2]
+$sel set beta 1
+set badwater [atomselect top "name OH2 and beta > 0"]
+set seglistwater [$badwater get segid]
+set reslistwater [$badwater get resid]
+
+mol delete all
+resetpsf
+
+readpsf solvate.psf
+coordpdb solvate.pdb
+foreach segid $seglistlipid resid $reslistlipid {
+        delatom $segid $resid
+}
+
+foreach segid $seglistwater resid $reslistwater {
+        delatom $segid $resid
+}
+
+writepsf LPW.psf
+writepdb LPW.pdb
+mol delete all
+#-----------------------------------------------------------------------
+mol new LPW.psf
+mol new LPW.pdb
+set sel1 [atomselect top protein]
+$sel1 writepdb protein.pdb
+$sel1 writepsf protein.psf
+
+set sel2 [atomselect top lipids]
+$sel2 writepdb lipids.pdb
+$sel2 writepsf lipids.psf
+
+for {set i 1} {$i < 9} {incr i} {
+        set sel [atomselect top "segname WAT${i}.pdb"]
+        $sel writepdb WAT${i}.pdb
+}
+
+mol delete all
+#-------------------------------------------------------------------------
+package require psfgen
+resetpsf
+topology /nethome/lutimba/Toppology_files/top_all36_prot.rtf
+topology /nethome/lutimba/Toppology_files/top_all27_prot_lipid.rtf
+topology /nethome/lutimba/Toppology_files/top_all36_lipid.rtf
+topology /nethome/lutimba/Toppology_files/top_all36_na.rtf
+topology /nethome/lutimba/Toppology_files/top_all27_prot_lipid.inp
+topology /nethome/lutimba/Toppology_files/toppar_water_ions.str
+
+# add protein
+pdbalias residue HIS HSE
+pdbalias atom ILE CD1 CD
+
+segment LACY {
+        pdb protein.pdb
+}
+regenerate angles dihedrals
+coordpdb protein.pdb LACY
+
+readpsf lipid.psf
+coordpdb lipid.pdb
+
+for {set i 1} {$i < 9} {incr i} {
+        segment WAT${i} {
+                pdb WAT${i}.pdb
+                auto none
+        }
+        coordpdb WAT${i}.pdb WAT${i}
+}
+
+guesscoord
+
+writepsf LacY_POPE-all.psf
+writepdb LacY_POPE-all.pdb
+#-----------------------------------------------------------------
+#comment ionise the structure.
+
+
+
+
+
+
+
+
+
+
+
+
+

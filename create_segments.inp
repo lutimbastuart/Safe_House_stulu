@@ -1,0 +1,17 @@
+set sel [atomselect top "protein"]
+$sel writepdb LACY.pdb
+
+set sel [atomselect top "lipids"]
+$sel writepdb POPE.pdb
+
+for {set i 1} {$i < 9} {incr i} {
+	set sel [atomselect top "segname WAT${i}.pdb"]
+	$sel writepdb WAT${i}.pdb
+}
+
+#ions
+
+
+
+
+

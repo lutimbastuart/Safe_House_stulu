@@ -1,0 +1,21 @@
+# this script calculates rmsf on CA atoms 
+
+set mypdb  NaK-6_CAonly.pdb 
+set mydcd  NaK-6_CA.dcd 
+set output NaK-7-12
+mol new  $mypdb
+animate delete all
+mol addfile $mydcd   waitfor all
+set idf [open ${output}_rmsf.dat w]
+set all [atomselect top all]
+foreach resid [$all get resid] rmsf [measure rmsf $all] {
+	
+	puts $idf "$resid $rmsf"
+	
+}
+close $idf
+
+
+
+exit
+

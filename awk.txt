@@ -1,0 +1,25 @@
+#printing the specific rows in the out put files.
+awk '{print $4}' LacY-cent_mass-occ+H-1-1.dat > Z-axis_centerOM.out
+
+#Printing a given raw with the identifer say TMD och SMD
+awk '{ if ($1=="TMD") print $2, $6}' lac-TMD01.out > TMD.out
+
+#Cell dimension analysis 
+awk -f get_cell2.awk  ../../npt04.xst > npt04_cell.out
+awk -f get_cell2.awk  ../../npt03.xst > npt03_cell.out
+
+awk '{print $1+1, $2, $3}' npt04_cell.out > npt04_cell-cont.out
+
+cat npt03_cell.out npt04_cell-cont.out > npt03-04_cell.out
+
+
+
+#################################
+get different datastreams from the simulation output file using this script
+
+BEGIN{i=1} {if($1 == "ENERGY:"){print i,$16};i=i+1}
+
+#combinig files in bash
+for f in ?.dat ??.dat ???.dat; do echo -n $f " "; done  > me.out
+
+
