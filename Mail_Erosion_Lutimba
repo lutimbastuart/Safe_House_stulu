@@ -1,0 +1,91 @@
+git clone https://github.com/laramies/theHarvester
+cd theHarvester/
+python3.8 -m pip install -r requirements/dev.txt
+python3.8 theHarvester.py
+
+python3.8 theHarvester.py -d nthu.edu.tw -l 300 -b bing
+
+
+
+
+----------------------------------------------------------Send massivve mails 
+mergo plugin in gmail.
+
+
+#The procedure to set up a postfix mail transfer in linux by lutimba stuart 
+
+#to view the host name: 
+hostname -f
+#Create or change the host name: 
+hostname $host_name.com
+
+#Append the host name to the hosts_list 
+sudo $host_name.com > /etc/hosts
+
+#Then Reboot the system 
+
+# The tool required: 
+sudo apt-get update
+sudo apt-get install mailutils
+apt-get install libsasl2-modules postfix
+
+#chose internet and Change to the hostname.
+
+#Configuring the Postfix with Gmail SMTP 
+sudo nano /etc/postfix/main.cf
+
+relayhost = [smtp.gmail.com]:587
+myhostname =
+
+#Append the following to the bottom 
+# Enables SASL authentication for postfix
+smtp_sasl_auth_enable = yes
+# Disallow methods that allow anonymous authentication
+smtp_sasl_security_options = noanonymous
+# Location of sasl_passwd we saved
+smtp_sasl_password_maps = hash:/etc/postfix/sasl/sasl_passwd
+# Enable STARTTLS encryption for SMTP
+smtp_tls_security_level = encrypt
+# Location of CA certificates for TLS
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+####################----#########################
+
+#Change the myhost to hostname:
+myhostname = $host_name.com
+
+#Eddit the main.cfi 
+#like: mydestination = localhost.lutimbakyeswa.com, , localhost
+mydestination = localhost.yourhostname.com, , localhost
+
+
+#Create a password: 
+sudo nano /etc/postfix/sasl/sasl_passwd
+
+#And in this file add the following 
+[smtp.gmail.com]:587 your-email-address@gmail.com:password
+
+
+#Then hash the password 
+sudo postmap /etc/postfix/sasl/sasl_passwd
+
+#And in this file add the following 
+[smtp.gmail.com]:587 your-email-address@gmail.com:password
+
+
+#Then hash the password 
+sudo postmap /etc/postfix/sasl/sasl_passwd
+#Creat ownership to the password file and the database created 
+chown root:root /etc/postfix/sasl/sasl_passwd.db
+chmod 600 /etc/postfix/sasl/sasl_passwd.db
+
+#Restart your server 
+systemctl restart postfix
+sudo service postfix restart
+
+
+
+#Sample mail send 
+echo "Test Postfix Gmail SMTP Relay via https://lutimbakyeswa.com/?p=5809" | mail -s "Postfix Gmail SMTP Relay 1" lutimbastuart@gmail.com
+
+
+creatid: https://restorebin.com/configure-postfix-smtp-relay/
